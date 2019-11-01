@@ -1,0 +1,7 @@
+flask
+numpy
+keras==2.2.5
+sklearn
+scipy==1.1.0
+pillow
+tensorflow==1.14
