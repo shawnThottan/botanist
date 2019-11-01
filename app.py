@@ -7,7 +7,10 @@ from PIL import Image
 from keras.preprocessing.image import img_to_array
 from flask import Flask
 from flask import request
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/analyse', methods=["GET","POST"])
 def predict_plant_disease():
