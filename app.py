@@ -2,6 +2,7 @@ import pickle
 import io
 import base64
 import numpy as np
+import tensorflow as tf
 from PIL import Image
 from keras.preprocessing.image import img_to_array
 from flask import Flask
@@ -30,19 +31,31 @@ def predict_plant_disease():
                 try:
                     image = Image.open(io.BytesIO(base64.b64decode(image_data)))
                     if image is not None :
-                        image = image.resize(tuple((256, 256)), Image.ANTIALIAS)
+                        image = image.resize(tuple((224, 224)), Image.ANTIALIAS)
                         image_array = np.expand_dims(img_to_array(image), axis=0)
                     else :
                         raise Exception('Error loading image file')
                 except Exception as e:
                     return None, str(e)
                 model_file = f"cnn_model.pkl"
-                saved_classifier_model = pickle.load(open(model_file,'rb'))
-                prediction = saved_classifier_model.predict(image_array) 
-                label_binarizer = pickle.load(open(f"label_transform.pkl",'rb'))
+                
+                interpreter = tf.lite.Interpreter(model_path="optimized_graph.tflite")
+                interpreter.allocate_tensors()
+                input_details = interpreter.get_input_details()
+                output_details = interpreter.get_output_details()
+                
+                interpreter.set_tensor(input_details[0]['index'], image_array)
+
+                interpreter.invoke()
+
+                output_data = interpreter.get_tensor(output_details[0]['index'])
+                best_match_index = np.argmax(output_data)
+
+                with open('retrained_labels.txt', 'r') as f:
+                    matrix = [line.strip() for line in f]
                 return_data = {
                     "error" : "0",
-                    "data" : f"{label_binarizer.inverse_transform(prediction)[0]}"
+                    "data" : matrix[best_match_index]
                 }
             else :
                 return_data = {
