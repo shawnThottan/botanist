@@ -18,10 +18,9 @@ def predict_plant_disease():
                 "message" : "Plant Disease Recognition Api."
             }
         else:
-            if request.form:
-                print(0)
-                request_data = request.form["plant_image"]
-                header, image_data = request_data.split(';base64,')
+            if request.files:
+                image_file = request.files["plant_image"]
+                image_data = base64.b64encode(image_file.read())
                 image_array = 0
                 try:
                     image = Image.open(io.BytesIO(base64.b64decode(image_data)))
