@@ -4,6 +4,6 @@ keras==2.2.5
 sklearn
 scipy==1.1.0
 pillow
-tensorflow==1.14
+tensorflow==2.9.3
 gunicorn
 flask-cors
